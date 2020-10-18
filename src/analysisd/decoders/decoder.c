@@ -46,16 +46,17 @@ void DecodeEvent(Eventinfo *lf, regex_matching *decoder_match)
 
         /* First check program name */
         if (lf->program_name) {
-            if (!OSMatch_Execute(lf->program_name, lf->p_name_size,
-                                 nnode->program_name)) {
+            //if (!OSMatch_Execute(lf->program_name, lf->p_name_size,
+            //                     nnode->program_name->match)) {
+            if (!w_expression_test(nnode->program_name, lf->program_name, lf->p_name_size)) {
                 continue;
             }
             pmatch = lf->log;
         }
 
         /* If prematch fails, go to the next osdecoder in the list */
-        if (nnode->prematch) {
-            if (!(pmatch = OSRegex_Execute_ex(lf->log, nnode->prematch, decoder_match))) {
+        if (nnode->prematch && nnode->prematch->regex) {
+            if (!(pmatch = OSRegex_Execute_ex(lf->log, nnode->prematch->regex, decoder_match))) {
                 continue;
             }
 
@@ -91,7 +92,7 @@ void DecodeEvent(Eventinfo *lf, regex_matching *decoder_match)
                  * going. If we don't have a prematch, stop
                  * and go for the regexes.
                  */
-                if (nnode->prematch) {
+                if (nnode->prematch && nnode->prematch->regex) {
                     const char *llog2;
 
                     /* If we have an offset set, use it */
@@ -101,7 +102,7 @@ void DecodeEvent(Eventinfo *lf, regex_matching *decoder_match)
                         llog2 = lf->log;
                     }
 
-                    if ((cmatch = OSRegex_Execute_ex(llog2, nnode->prematch, decoder_match))) {
+                    if ((cmatch = OSRegex_Execute_ex(llog2, nnode->prematch->regex, decoder_match))) {
                         if (*cmatch != '\0') {
                             cmatch++;
                         }
@@ -148,7 +149,7 @@ void DecodeEvent(Eventinfo *lf, regex_matching *decoder_match)
             /* If we have an external decoder, execute it */
             if (nnode->plugindecoder) {
                 nnode->plugindecoder(lf, decoder_match);
-            } else if (nnode->regex) {
+            } else if (nnode->regex && nnode->regex->regex) {
                 int i;
 
                 /* With regex we have multiple options
@@ -175,7 +176,7 @@ void DecodeEvent(Eventinfo *lf, regex_matching *decoder_match)
                 }
 
                 /* If Regex does not match, return */
-                if (!(result = OSRegex_Execute_ex(llog, nnode->regex, decoder_match))) {
+                if (!(result = OSRegex_Execute_ex(llog, nnode->regex->regex, decoder_match))) {
                     if (nnode->get_next) {
                         child_node = child_node->next;
                         nnode = child_node->osdecoder;

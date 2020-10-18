@@ -91,15 +91,15 @@ void _getDecodersListJSON(OSDecoderNode *list, cJSON *array) {
 
         if (node->osdecoder->accumulate) cJSON_AddStringToObject(decoder,"accumulate","yes"); else cJSON_AddStringToObject(decoder,"accumulate","no");
 
-        if (node->osdecoder->prematch) cJSON_AddStringToObject(decoder,"prematch",node->osdecoder->prematch->raw);
+        if (node->osdecoder->prematch) cJSON_AddStringToObject(decoder,"prematch",node->osdecoder->prematch->regex->raw);
         if (node->osdecoder->prematch_offset & AFTER_PARENT) cJSON_AddStringToObject(decoder,"prematch_offset","after_parent");
 
-        if (node->osdecoder->regex) cJSON_AddStringToObject(decoder,"regex",node->osdecoder->regex->raw);
+        if (node->osdecoder->regex) cJSON_AddStringToObject(decoder,"regex",node->osdecoder->regex->regex->raw);
         if (node->osdecoder->regex_offset & AFTER_PARENT) cJSON_AddStringToObject(decoder,"regex_offset","after_parent");
         else if (node->osdecoder->regex_offset & AFTER_PREVREGEX) cJSON_AddStringToObject(decoder,"regex_offset","after_regex");
         else if (node->osdecoder->regex_offset & AFTER_PREMATCH) cJSON_AddStringToObject(decoder,"regex_offset","after_prematch");
 
-        if (node->osdecoder->program_name) cJSON_AddStringToObject(decoder,"program_name",node->osdecoder->program_name->raw);
+        if (node->osdecoder->program_name) cJSON_AddStringToObject(decoder,"program_name",node->osdecoder->program_name->match->raw);
 
         if (node->osdecoder->fts) {
             cJSON *_list = cJSON_CreateArray();
